@@ -99,37 +99,28 @@ void InterruptMotorEncoder(void)
     volatile uint32_t gpioa_buf = GPIOA->IDR;
     volatile uint32_t gpiob_buf = GPIOB->IDR;
 
+    // Remapped pinout (see m5_fw_build/README.md): encoder pin sets are unchanged
+    // but reassigned to motors, so each pin-pair block keeps its quadrature logic
+    // and only the encoder_raw[] index it feeds changes:
+    //   PB9/PB8 -> M1 ([0]),  PB7/PB6 -> M2 ([1]),  PA4/PA5 -> M3 ([2]),  PA6/PA7 -> M4 ([3])
     if (!encoder_ab_mode) {
-        if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_6) != RESET) //M1, PA6+PA7
+        if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_6) != RESET) //M4, PA6+PA7
         {
 
             if((gpioa_buf & GPIO_PIN_7) ^ ((gpioa_buf & GPIO_PIN_6) << 1))
             {
-                encoder_raw[0] += 1;
+                encoder_raw[3] += 1;
             }
             else
             {
-                encoder_raw[0] -= 1;
+                encoder_raw[3] -= 1;
             }
             __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_6);
         }
-        
-        if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_4) != RESET) //M2, PA4+PA5
+
+        if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_4) != RESET) //M3, PA4+PA5
         {
             if((gpioa_buf & GPIO_PIN_5) ^ ((gpioa_buf & GPIO_PIN_4) << 1))
-            {
-                encoder_raw[1] += 1;
-            }
-            else
-            {
-                encoder_raw[1] -= 1;
-            }
-            __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_4);
-        }
-        
-        if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_9) != RESET) //M3, PB9+PB8
-        {
-            if(((gpiob_buf & GPIO_PIN_8) << 1) ^ (gpiob_buf & GPIO_PIN_9))
             {
                 encoder_raw[2] += 1;
             }
@@ -137,53 +128,53 @@ void InterruptMotorEncoder(void)
             {
                 encoder_raw[2] -= 1;
             }
-            __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_9);
+            __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_4);
         }
-        
-        if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_7) != RESET) //M4, PB7+PB6
+
+        if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_9) != RESET) //M1, PB9+PB8
         {
-            if((gpiob_buf & GPIO_PIN_6) ^ ((gpiob_buf & GPIO_PIN_7) >> 1))
+            if(((gpiob_buf & GPIO_PIN_8) << 1) ^ (gpiob_buf & GPIO_PIN_9))
             {
-                encoder_raw[3] += 1;
+                encoder_raw[0] += 1;
             }
             else
             {
-                encoder_raw[3] -= 1;
+                encoder_raw[0] -= 1;
+            }
+            __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_9);
+        }
+
+        if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_7) != RESET) //M2, PB7+PB6
+        {
+            if((gpiob_buf & GPIO_PIN_6) ^ ((gpiob_buf & GPIO_PIN_7) >> 1))
+            {
+                encoder_raw[1] += 1;
+            }
+            else
+            {
+                encoder_raw[1] -= 1;
             }
             __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_7);
         }
     }
     else {
-        if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_7) != RESET) //M1, PA6+PA7
+        if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_7) != RESET) //M4, PA6+PA7
         {
 
             if((gpioa_buf & GPIO_PIN_6) ^ ((gpioa_buf & GPIO_PIN_7) >> 1))
             {
-                encoder_raw[0] += 1;
+                encoder_raw[3] += 1;
             }
             else
             {
-                encoder_raw[0] -= 1;
+                encoder_raw[3] -= 1;
             }
             __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_7);
         }
-        
-        if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_5) != RESET) //M2, PA4+PA5
+
+        if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_5) != RESET) //M3, PA4+PA5
         {
             if((gpioa_buf & GPIO_PIN_4) ^ ((gpioa_buf & GPIO_PIN_5) >> 1))
-            {
-                encoder_raw[1] += 1;
-            }
-            else
-            {
-                encoder_raw[1] -= 1;
-            }
-            __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_5);
-        }
-        
-        if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_8) != RESET) //M3, PB9+PB8
-        {
-            if(((gpiob_buf & GPIO_PIN_9) >> 1) ^ (gpiob_buf & GPIO_PIN_8))
             {
                 encoder_raw[2] += 1;
             }
@@ -191,18 +182,31 @@ void InterruptMotorEncoder(void)
             {
                 encoder_raw[2] -= 1;
             }
-            __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_8);
+            __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_5);
         }
-        
-        if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_6) != RESET) //M4, PB7+PB6
+
+        if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_8) != RESET) //M1, PB9+PB8
         {
-            if((gpiob_buf & GPIO_PIN_6) ^ ((gpiob_buf & GPIO_PIN_7) >> 1))
+            if(((gpiob_buf & GPIO_PIN_9) >> 1) ^ (gpiob_buf & GPIO_PIN_8))
             {
-                encoder_raw[3] += 1;
+                encoder_raw[0] += 1;
             }
             else
             {
-                encoder_raw[3] -= 1;
+                encoder_raw[0] -= 1;
+            }
+            __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_8);
+        }
+
+        if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_6) != RESET) //M2, PB7+PB6
+        {
+            if((gpiob_buf & GPIO_PIN_6) ^ ((gpiob_buf & GPIO_PIN_7) >> 1))
+            {
+                encoder_raw[1] += 1;
+            }
+            else
+            {
+                encoder_raw[1] -= 1;
             }
             __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_6);
         }

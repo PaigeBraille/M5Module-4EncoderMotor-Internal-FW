@@ -6,23 +6,25 @@
 
 #include <stdlib.h>
 
-#define M1R_H GPIOB->BSRR=(uint32_t)1<<14
-#define M1R_L GPIOB->BSRR=(uint32_t)(1<<14)<<16
-#define M1F_H GPIOB->BSRR=(uint32_t)1<<15
-#define M1F_L GPIOB->BSRR=(uint32_t)(1<<15)<<16
+// Remapped pinout (see m5_fw_build/README.md). Direction pins reassigned:
+//   M1 R/F = PB4/PB5,  M2 R/F = PB14/PB15,  M3 R/F = PB12/PB13,  M4 R/F = PA12/PB3
+#define M1R_H GPIOB->BSRR=(uint32_t)1<<4
+#define M1R_L GPIOB->BSRR=(uint32_t)(1<<4)<<16
+#define M1F_H GPIOB->BSRR=(uint32_t)1<<5
+#define M1F_L GPIOB->BSRR=(uint32_t)(1<<5)<<16
 
-#define M2R_H GPIOB->BSRR=(uint32_t)1<<12
-#define M2R_L GPIOB->BSRR=(uint32_t)(1<<12)<<16
-#define M2F_H GPIOB->BSRR=(uint32_t)1<<13
-#define M2F_L GPIOB->BSRR=(uint32_t)(1<<13)<<16
+#define M2R_H GPIOB->BSRR=(uint32_t)1<<14
+#define M2R_L GPIOB->BSRR=(uint32_t)(1<<14)<<16
+#define M2F_H GPIOB->BSRR=(uint32_t)1<<15
+#define M2F_L GPIOB->BSRR=(uint32_t)(1<<15)<<16
 
-#define M3R_H GPIOB->BSRR=(uint32_t)1<<4
-#define M3R_L GPIOB->BSRR=(uint32_t)(1<<4)<<16
-#define M3F_H GPIOB->BSRR=(uint32_t)1<<5
-#define M3F_L GPIOB->BSRR=(uint32_t)(1<<5)<<16
+#define M3R_H GPIOB->BSRR=(uint32_t)1<<12
+#define M3R_L GPIOB->BSRR=(uint32_t)(1<<12)<<16
+#define M3F_H GPIOB->BSRR=(uint32_t)1<<13
+#define M3F_L GPIOB->BSRR=(uint32_t)(1<<13)<<16
 
-#define M4R_H GPIOA->BSRR=(uint32_t)1<<15
-#define M4R_L GPIOA->BSRR=(uint32_t)(1<<15)<<16
+#define M4R_H GPIOA->BSRR=(uint32_t)1<<12
+#define M4R_L GPIOA->BSRR=(uint32_t)(1<<12)<<16
 #define M4F_H GPIOB->BSRR=(uint32_t)1<<3
 #define M4F_L GPIOB->BSRR=(uint32_t)(1<<3)<<16
 
