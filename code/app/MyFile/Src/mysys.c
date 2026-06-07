@@ -35,21 +35,33 @@ void SpeedUpdate()
     }
 }
 
+// config[pos][4..7] is the position setpoint, but the 13-byte config rows make
+// it unaligned for pos 1..3. Cortex-M0 hard-faults on unaligned word loads
+// (the Keil-built factory firmware got away with it), so assemble it bytewise.
+static int32_t GetPositionPoint(uint8_t pos)
+{
+    return (int32_t)((uint32_t)config[pos][4] |
+                     ((uint32_t)config[pos][5] << 8) |
+                     ((uint32_t)config[pos][6] << 16) |
+                     ((uint32_t)config[pos][7] << 24));
+}
+
 void PositionPID(uint8_t pos)
 {
     static uint32_t next_update_time_pos[4] = { 0, 0, 0, 0};
     int32_t out_data = 0;
-    
+
     if(next_update_time_pos[pos] < HAL_GetTick())
     {
         next_update_time_pos[pos] = HAL_GetTick() + 10;
-        if(((*(int32_t *)&config[pos][4] - encoder_raw[pos]) < 2) && ((*(int32_t *)&config[pos][4] - encoder_raw[pos]) > -2))
+        int32_t position_point = GetPositionPoint(pos);
+        if(((position_point - encoder_raw[pos]) < 2) && ((position_point - encoder_raw[pos]) > -2))
         {
             out_data = 0;
         }
         else
         {
-            out_data = PIDPos(&pid_pos[pos], *(int32_t *)&config[pos][4], encoder_raw[pos]);
+            out_data = PIDPos(&pid_pos[pos], position_point, encoder_raw[pos]);
         }
         motor_throttle[pos] = CONSTRAIN(out_data, 0 - config[pos][8], config[pos][8]);
     }
