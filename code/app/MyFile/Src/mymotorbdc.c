@@ -36,9 +36,13 @@ uint32_t my_timestamp_now[4] = {0};
 uint32_t my_timestamp_prev[4] = {0};
 float my_Ts[4] = {0};
 uint8_t is_bootup[4] = {0};
+volatile uint8_t motor_last_dir[4] = {MDIR_FFW, MDIR_FFW, MDIR_FFW, MDIR_FFW};
 
 void SetMotorDir(uint8_t port,uint8_t dir)
 {
+    if (port < 4) {
+        motor_last_dir[port] = dir;
+    }
     switch(port)
     {
         case PWM_M1:

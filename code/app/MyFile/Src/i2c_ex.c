@@ -134,6 +134,12 @@ __attribute__((weak)) void i2c2_receive_callback(uint8_t *rx_data, uint16_t len)
 		else if (rx_data[0] == 0xD1)
 		{
 			i2c2_set_send_data((uint8_t *)&soft_start_stop_switch, 1);
+		}
+		else if (rx_data[0] == 0xD2)
+		{
+			// Bit n: motor n's encoder B seen working (mymotorencoder.c).
+			extern volatile uint8_t encoder_b_alive;
+			i2c2_set_send_data((uint8_t *)&encoder_b_alive, 1);
 		}						
 		else		
 			I2CRead(rx_data[0]);

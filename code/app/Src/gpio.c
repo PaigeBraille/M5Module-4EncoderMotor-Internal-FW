@@ -63,7 +63,7 @@ void MX_GPIO_Init(void)
     /*Configure GPIO pins : PA5 PA7 */
     GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_7;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;  // encoder direction line: defined level if the board has no pull-up
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /*Configure GPIO pins : PB12 PB13 PB14 PB15
@@ -85,7 +85,7 @@ void MX_GPIO_Init(void)
     /*Configure GPIO pins : PB6 PB8 */
     GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_8;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;  // encoder direction line: defined level if the board has no pull-up
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     /*Configure GPIO pins : PB7 PB9 */
@@ -105,7 +105,7 @@ void MX_GPIO_Init(void)
     /*Configure GPIO pins : PA4 PA6 */
     GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_6;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;  // encoder direction line: defined level if the board has no pull-up
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /*Configure GPIO pins : PA5 PA7 */
@@ -139,7 +139,7 @@ void MX_GPIO_Init(void)
     /*Configure GPIO pins : PB7 PB9 */
     GPIO_InitStruct.Pin = GPIO_PIN_7|GPIO_PIN_9;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;  // encoder direction line: defined level if the board has no pull-up
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
   }
 
@@ -165,13 +165,13 @@ void set_ab_mode(void)
     /*Configure GPIO pins : PA5 PA7 */
     GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_7;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;  // encoder direction line: defined level if the board has no pull-up
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /*Configure GPIO pins : PB6 PB8 */
     GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_8;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;  // encoder direction line: defined level if the board has no pull-up
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     /*Configure GPIO pins : PB7 PB9 */
@@ -184,7 +184,7 @@ void set_ab_mode(void)
     /*Configure GPIO pins : PA4 PA6 */
     GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_6;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;  // encoder direction line: defined level if the board has no pull-up
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /*Configure GPIO pins : PA5 PA7 */
@@ -202,7 +202,7 @@ void set_ab_mode(void)
     /*Configure GPIO pins : PB7 PB9 */
     GPIO_InitStruct.Pin = GPIO_PIN_7|GPIO_PIN_9;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;  // encoder direction line: defined level if the board has no pull-up
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
   }  
 }
