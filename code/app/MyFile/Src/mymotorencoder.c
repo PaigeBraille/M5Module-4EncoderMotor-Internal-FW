@@ -11,6 +11,12 @@ volatile uint8_t encoder_b_alive = 0;
 #define M2_B_ALIVE_EDGES 16
 static uint8_t m2_last_b = 0;
 static uint8_t m2_b_alternations = 0;
+static uint8_t m2_b_toggles = 0;     // B has alternated for M2_B_ALIVE_EDGES edges in a row
+static uint8_t m2_last_phase = 0xff; // the last decode, B xor A: 1 counts up, 0 counts down
+static uint8_t m2_phase_run = 0;     // consecutive A edges with that decode
+static uint8_t m2_phase_seen = 0;    // bit p: decode p held for M2_B_ALIVE_EDGES edges
+static uint8_t m2_phase_agree = 0;   // bit p: and it matched the drive direction then
+static uint8_t m2_invert = 0;        // B decodes the opposite way to the drive direction
 #endif
 
 int32_t GetEncoderPos(uint8_t port)
@@ -165,12 +171,27 @@ void InterruptMotorEncoder(void)
             // quadrature decode does); a coast after a reversal is counted the new way.
             if (!(encoder_b_alive & (1u << 1)))
             {
+                // B also has to decode BOTH directions before it is trusted. A B that
+                // follows A alternates at every A edge too, but B xor A then never
+                // changes, so the count runs one way whichever way the disc turns, and
+                // homing loses the disc when it reverses off the sensor (a repaired v7
+                // encoder board, 25 Oct 2026). Each decode is also checked against the
+                // drive direction: if B decodes the opposite way to it, the count is
+                // flipped, so the hand-over from the fallback does not reverse the count
+                // part way through a session. If the two decodes disagree with each other
+                // about that (a coast across a reversal), the evidence is thrown away.
                 uint8_t b = (gpiob_buf & GPIO_PIN_6) ? 1 : 0;
+                uint8_t phase = ((gpiob_buf & GPIO_PIN_6) ^ ((gpiob_buf & GPIO_PIN_7) >> 1)) ? 1 : 0;
+                uint8_t drive_up = (motor_last_dir[1] == MDIR_FFW) ? 0 : 1;
                 if (b != m2_last_b)
                 {
-                    if (++m2_b_alternations >= M2_B_ALIVE_EDGES)
+                    if (m2_b_alternations < M2_B_ALIVE_EDGES)
                     {
-                        encoder_b_alive |= (1u << 1);
+                        m2_b_alternations++;
+                    }
+                    if (m2_b_alternations >= M2_B_ALIVE_EDGES)
+                    {
+                        m2_b_toggles = 1;
                     }
                 }
                 else
@@ -178,6 +199,34 @@ void InterruptMotorEncoder(void)
                     m2_b_alternations = 0;
                 }
                 m2_last_b = b;
+
+                m2_phase_run = (phase == m2_last_phase && m2_phase_run < 255) ? m2_phase_run + 1 : 1;
+                m2_last_phase = phase;
+                if (m2_phase_run == M2_B_ALIVE_EDGES)
+                {
+                    m2_phase_seen |= (uint8_t)(1u << phase);
+                    if (phase == drive_up)
+                    {
+                        m2_phase_agree |= (uint8_t)(1u << phase);
+                    }
+                    else
+                    {
+                        m2_phase_agree &= (uint8_t)~(1u << phase);
+                    }
+                }
+                if (m2_b_toggles && m2_phase_seen == 3)
+                {
+                    if (m2_phase_agree == 3 || m2_phase_agree == 0)
+                    {
+                        m2_invert = (m2_phase_agree == 0) ? 1 : 0;
+                        encoder_b_alive |= (1u << 1);
+                    }
+                    else
+                    {
+                        m2_phase_seen = 0;
+                        m2_phase_agree = 0;
+                    }
+                }
             }
             if (!(encoder_b_alive & (1u << 1)))
             {
@@ -191,7 +240,17 @@ void InterruptMotorEncoder(void)
                 }
             }
             else
-#endif
+            {
+                if(((gpiob_buf & GPIO_PIN_6) ^ ((gpiob_buf & GPIO_PIN_7) >> 1)) ? !m2_invert : m2_invert)
+                {
+                    encoder_raw[1] += 1;
+                }
+                else
+                {
+                    encoder_raw[1] -= 1;
+                }
+            }
+#else
             if((gpiob_buf & GPIO_PIN_6) ^ ((gpiob_buf & GPIO_PIN_7) >> 1))
             {
                 encoder_raw[1] += 1;
@@ -200,6 +259,7 @@ void InterruptMotorEncoder(void)
             {
                 encoder_raw[1] -= 1;
             }
+#endif
             __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_7);
         }
     }
